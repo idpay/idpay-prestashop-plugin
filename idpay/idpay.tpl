@@ -5,7 +5,7 @@
             <a
                href="{$base_dir}modules/idpay/callback.php?do=payment" title="IDPay">
                 <img src="modules/idpay/logo.png" />
-                درگاه پرداخت آیدی پی
+                {$name}
             </a>
         </p>
     </div>
