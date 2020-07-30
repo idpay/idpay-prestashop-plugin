@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
-	<name>idpay</name>
+	<name>IDPay</name>
 	<displayName><![CDATA[افزونه پرداخت IDPay]]></displayName>
 	<version><![CDATA[2.0]]></version>
 	<description><![CDATA[ پرداخت آنلاین با درگاه IDPay]]></description>
-	<author><![CDATA[Developer: JMDMahdi, Publisher: IDPay]]></author>
+	<author><![CDATA[Developer: JMDMahdi, meysamrazmi, vispa, Publisher: IDPay]]></author>
 	<tab><![CDATA[payments_gateways]]></tab>
 	<confirmUninstall><![CDATA[آیا برای پاک کردن اطلاعات مطمئن هستید؟]]></confirmUninstall>
 	<is_configurable>1</is_configurable>
