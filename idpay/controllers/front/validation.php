@@ -221,12 +221,12 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
             die;
         }
 
-        if (!empty($_{$method}['id']) && !empty($_{$method}['order_id']) && !empty($_{$method}['status'])) {
-            $order_id = $_{$method}['order_id'];
+        if (!empty(${'_'.$method}['id']) && !empty(${'_'.$method}['order_id']) && !empty(${'_'.$method}['status'])) {
+            $order_id = ${'_'.$method}['order_id'];
             $order = new Order((int)$order_id);
-            $pid = $_{$method}['id'];
-            $status = $_{$method}['status'];
-            $track_id = $_{$method}['track_id'];
+            $pid = ${'_'.$method}['id'];
+            $status = ${'_'.$method}['status'];
+            $track_id = ${'_'.$method}['track_id'];
             $amount = (float)$order->total_paid_tax_incl;
 
             if (Configuration::get('idpay_currency') == "toman") {
@@ -237,7 +237,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
             if (!empty($pid) && !empty($order_id) && md5($amount . $order->id . Configuration::get('idpay_HASH_KEY')) == $_GET['hash']) {
 
 
-                if ($_{$method}['status'] == 10) {
+                if (${'_'.$method}['status'] == 10) {
 
                     $api_key = Configuration::get('idpay_api_key');
                     $sandbox = Configuration::get('idpay_sandbox') == 'yes' ? 'true' : 'false';
