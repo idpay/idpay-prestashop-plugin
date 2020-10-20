@@ -151,7 +151,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
         $mail = Context::getContext()->customer->email;
 
 
-        $desc = $Description = 'پرداخت سفارش شماره: ' . $cart->id;
+        $desc = $Description = 'پرداخت سفارش شماره: ' . $order_id;
         $url = $this->context->link->getModuleLink('idpay', 'validation', array(), true);
         $callback = $url . '?do=callback&hash=' . md5($amount . $order_id . Configuration::get('idpay_HASH_KEY'));
 
