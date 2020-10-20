@@ -153,7 +153,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
 
         $desc = $Description = 'پرداخت سفارش شماره: ' . $order_id;
         $url = $this->context->link->getModuleLink('idpay', 'validation', array(), true);
-        $callback = $url . '?do=callback&hash=' . md5($amount . $order_id . Configuration::get('idpay_HASH_KEY'));
+        $callback = $url . '&do=callback&hash=' . md5($amount . $order_id . Configuration::get('idpay_HASH_KEY'));
 
 
         if (empty($amount)) {
@@ -217,27 +217,33 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
      */
     public function callBack($customer)
     {
-        if (empty($method = $_SERVER['REQUEST_METHOD'])) {
-            die;
+
+        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+            $order_id = $_GET['order_id'];
+            $order = new Order((int)$order_id);
+            $pid = $_GET['id'];
+            $status = $_GET['status'];
+            $track_id = $_GET['track_id'];
+            $amount = (float)$order->total_paid_tax_incl;
+        }
+        elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $order_id = $_POST['order_id'];
+            $order = new Order((int)$order_id);
+            $pid = $_POST['id'];
+            $status = $_POST['status'];
+            $track_id = $_POST['track_id'];
+            $amount = (float)$order->total_paid_tax_incl;
         }
 
-        if (!empty(${'_'.$method}['id']) && !empty(${'_'.$method}['order_id']) && !empty(${'_'.$method}['status'])) {
-            $order_id = ${'_'.$method}['order_id'];
-            $order = new Order((int)$order_id);
-            $pid = ${'_'.$method}['id'];
-            $status = ${'_'.$method}['status'];
-            $track_id = ${'_'.$method}['track_id'];
-            $amount = (float)$order->total_paid_tax_incl;
+        if (!empty($pid) && !empty($order_id) && !empty($status)) {
 
             if (Configuration::get('idpay_currency') == "toman") {
                 $amount *= 10;
             }
 
-
             if (!empty($pid) && !empty($order_id) && md5($amount . $order->id . Configuration::get('idpay_HASH_KEY')) == $_GET['hash']) {
 
-
-                if (${'_'.$method}['status'] == 10) {
+                if ($status == 10) {
 
                     $api_key = Configuration::get('idpay_api_key');
                     $sandbox = Configuration::get('idpay_sandbox') == 'yes' ? 'true' : 'false';
