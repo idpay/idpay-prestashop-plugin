@@ -7,7 +7,7 @@
  * @copyright (C) 2018-2020 IDPay
  * @license http://www.gnu.org/licenses/gpl-2.0.html GPLv2 or later
  *
- * http://idpay.ir
+ * https://idpay.ir
  */
 if (!defined('_PS_VERSION_'))
     exit;
@@ -221,6 +221,7 @@ class idpay extends PaymentModule
 
             $checkout_type = Configuration::get('PS_ORDER_PROCESS_TYPE') ? 'order-opc' : 'order';
             Tools::redirect( "/index.php?controller=$checkout_type&submitReorder=&id_order=$order_id&idpay-message=$msg");
+            exit;
         } else {
             Tools::redirect($result->link);
             exit;
