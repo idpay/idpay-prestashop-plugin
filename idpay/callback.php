@@ -7,7 +7,7 @@
  * @copyright (C) 2018-2020 IDPay
  * @license http://www.gnu.org/licenses/gpl-2.0.html GPLv2 or later
  *
- * http://idpay.ir
+ * https://idpay.ir
  */
 @session_start();
 if (isset($_GET['do'])) {
@@ -16,16 +16,17 @@ if (isset($_GET['do'])) {
     include_once(dirname(__FILE__) . '/idpay.php');
     global $cookie;
 
-    $status   = empty( $_POST['status'] )   ? NULL : $_POST['status'];
-    $track_id = empty( $_POST['track_id'] ) ? NULL : $_POST['track_id'];
-    $pid      = empty( $_POST['id'] )       ? NULL : $_POST['id'];
-    $orderid  = empty( $_POST['order_id'] ) ? NULL : $_POST['order_id'];
-
     $idpay = new idpay;
     if ($_GET['do'] == 'payment') {
         $idpay->do_payment($cart);
     }
-    else if (!empty($pid) && !empty($orderid) && !empty($status) ) {
+
+    $status    = !empty($_POST['status'])  ? $_POST['status']   : (!empty($_GET['status'])  ? $_GET['status']   : NULL);
+    $track_id  = !empty($_POST['track_id'])? $_POST['track_id'] : (!empty($_GET['track_id'])? $_GET['track_id'] : NULL);
+    $pid       = !empty($_POST['id'])      ? $_POST['id']       : (!empty($_GET['id'])      ? $_GET['id']       : NULL);
+    $orderid   = !empty($_POST['order_id'])? $_POST['order_id'] : (!empty($_GET['order_id'])? $_GET['order_id'] : NULL);
+
+    if (!empty($pid) && !empty($orderid) && !empty($status) ) {
         $amount = $cart->getOrderTotal();
         if (Configuration::get('idpay_currency') == "toman") {
             $amount *= 10;
@@ -56,7 +57,7 @@ if (isset($_GET['do'])) {
                 curl_close( $ch );
 
                 if ( $http_status != 200 ) {
-                    echo $idpay->error( sprintf( $this->l('Error: %s (code: %s)'), $result->error_message, $result->error_code) );
+                    echo $idpay->error( sprintf( $idpay->l('Error: %s (code: %s)'), $result->error_message, $result->error_code) );
                 }
                 else {
                     $verify_status   = empty( $result->status ) ? NULL : $result->status;
@@ -88,7 +89,7 @@ if (isset($_GET['do'])) {
                     }
                 }
             } else {
-                $message = sprintf( $this->l('Error: %s (code: %s)'), $idpay->get_status($status), $status) .'<br>'. idpay_get_failed_message( $track_id, $orderid );
+                $message = sprintf( $idpay->l('Error: %s (code: %s)'), $idpay->get_status($status), $status) .'<br>'. idpay_get_failed_message( $track_id, $orderid );
 
                 $idpay->saveOrder($message, Configuration::get( 'PS_OS_ERROR' ), (int)$orderid, $track_id);
 
@@ -99,11 +100,11 @@ if (isset($_GET['do'])) {
                 Tools::redirect( "index.php?controller=$checkout_type&submitReorder=&id_order=$orderid");
             }
         } else {
-            echo $idpay->error( $this->l('Wrong Input Parameters.') );
+            echo $idpay->error( $idpay->l('Wrong Input Parameters.') );
         }
     }
     else{
-        echo $idpay->error( $this->l('No transaction found.') );
+        echo $idpay->error( $idpay->l('No transaction found.') );
     }
     include_once(dirname(__FILE__) . '/../../footer.php');
 } else {
