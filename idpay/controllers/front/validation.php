@@ -106,9 +106,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
 
         //call callBack function
         if (isset($_GET['do'])) {
-
             $this->callBack($customer);
-
         }
 
 
@@ -153,9 +151,9 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
         $mail = Context::getContext()->customer->email;
 
 
-        $desc = $Description = 'پرداخت سفارش شماره: ' . $cart->id;
+        $desc = $Description = 'پرداخت سفارش شماره: ' . $order_id;
         $url = $this->context->link->getModuleLink('idpay', 'validation', array(), true);
-        $callback = $url . '?do=callback&hash=' . md5($amount . $order_id . Configuration::get('idpay_HASH_KEY'));
+        $callback = $url . '&do=callback&hash=' . md5($amount . $order_id . Configuration::get('idpay_HASH_KEY'));
 
 
         if (empty($amount)) {
@@ -220,23 +218,32 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
     public function callBack($customer)
     {
 
-        if (!empty($_POST['id']) && !empty($_POST['order_id']) && !empty($_POST['amount']) && !empty($_POST['status'])) {
+        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+            $order_id = $_GET['order_id'];
+            $order = new Order((int)$order_id);
+            $pid = $_GET['id'];
+            $status = $_GET['status'];
+            $track_id = $_GET['track_id'];
+            $amount = (float)$order->total_paid_tax_incl;
+        }
+        elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $order_id = $_POST['order_id'];
             $order = new Order((int)$order_id);
             $pid = $_POST['id'];
             $status = $_POST['status'];
             $track_id = $_POST['track_id'];
             $amount = (float)$order->total_paid_tax_incl;
+        }
+
+        if (!empty($pid) && !empty($order_id) && !empty($status)) {
 
             if (Configuration::get('idpay_currency') == "toman") {
                 $amount *= 10;
             }
 
-
             if (!empty($pid) && !empty($order_id) && md5($amount . $order->id . Configuration::get('idpay_HASH_KEY')) == $_GET['hash']) {
 
-
-                if ($_POST['status'] == 10) {
+                if ($status == 10) {
 
                     $api_key = Configuration::get('idpay_api_key');
                     $sandbox = Configuration::get('idpay_sandbox') == 'yes' ? 'true' : 'false';
@@ -404,8 +411,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
     }
 
     /**
-     * @param $msgNumber
-     * @get status from $_POST['status]
+     * @param null $msgNumber
      * @return string
      */
     public function otherStatusMessages($msgNumber = null)
@@ -421,7 +427,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
             case "3":
                 $msg = "خطا رخ داده است";
                 break;
-            case "3":
+            case "4":
                 $msg = "بلوکه شده";
                 break;
             case "5":
