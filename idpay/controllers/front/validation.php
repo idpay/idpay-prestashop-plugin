@@ -152,16 +152,13 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
 
 
         $desc = $Description = 'پرداخت سفارش شماره: ' . $order_id;
-        $url = $this->context->link->getModuleLink('idpay', 'validation', array(), true);
-        $callback = $url . '&do=callback&hash=' . md5($amount . $order_id . Configuration::get('idpay_HASH_KEY'));
-
+        $callback = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? "https://" : "http://") . $_SERVER['SERVER_NAME'] . '/index.php?fc=module&module=idpay&controller=validation&id_lang=2&do=callback&hash=' . md5($amount . $order_id . Configuration::get('idpay_HASH_KEY'));
 
         if (empty($amount)) {
             $this->errors[] = $this->otherStatusMessages(404);
             $this->notification();
             Tools::redirect('index.php?controller=order-confirmation');
         }
-
 
         $data = array(
             'order_id' => $order_id,
