@@ -11,9 +11,11 @@
  */
 @session_start();
 if (isset($_GET['do'])) {
-    include(dirname(__FILE__) . '/../../config/config.inc.php');
-    include(dirname(__FILE__) . '/../../header.php');
-    include_once(dirname(__FILE__) . '/idpay.php');
+    //include(dirname(__FILE__) . '/../../config/config.inc.php');
+    //include(dirname(__FILE__) . '/../../header.php');
+   // include_once(dirname(__FILE__) . '/idpay.php');
+    var_dump(dirname(__FILE__) . '/idpay.php',dirname(__DIR__));
+    exit(0);
     global $cookie;
 
     $idpay = new idpay;
