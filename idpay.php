@@ -165,7 +165,7 @@ class idpay extends PaymentModule
         $name = $delivery->firstname . ' ' . $delivery->lastname;
         $phone = $delivery->phone_mobile;
 
-        if (empty($phone_mobile)) {
+        if (empty($phone)) {
             $phone = $delivery->phone;
         }
 
@@ -213,6 +213,13 @@ class idpay extends PaymentModule
         $result = json_decode($result);
         $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+
+        /* $result =
+          {
+              "id": "52f77bb5dc6d6b6d78a7419e3af680ff",
+              "link": "https://idpay.ir/p/ws-sandbox/52f77bb5dc6d6b6d78a7419e3af680ff"
+            }
+         */
 
         if ($http_status != 201 || empty($result) || empty($result->id) || empty($result->link)) {
             $msg = sprintf( $this->l('Error: %s (code: %s)'), $result->error_message, $result->error_code);
