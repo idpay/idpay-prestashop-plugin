@@ -268,12 +268,12 @@ class idpay extends PaymentModule
 
     public function error($str)
     {
-        return '<div class="alert alert-danger error" dir="rtl" style="text-align: right;padding: 15px;">' . $str . '</div>';
+        return '<div class="alert alert-danger error" dir="rtl" style="text-align: center;padding: 20px;font-size: 20px;">' . $str . '</div>';
     }
 
     public function success($str)
     {
-        return '<div class="conf alert-success confirm" dir="rtl" style="text-align: right;padding: 15px;">' . $str . '</div>';
+        return '<div class="conf alert-success confirm" dir="rtl" style="text-align: center;padding: 20px;font-size: 20px;">' . $str . '</div>';
     }
 
     public function hookPayment($params)
