@@ -227,7 +227,9 @@ class idpay extends PaymentModule
             $this->context->cookie->idpay_message = $msg;
 
             $checkout_type = Configuration::get('PS_ORDER_PROCESS_TYPE') ? 'order-opc' : 'order';
-            Tools::redirect( "/index.php?controller=$checkout_type&submitReorder=&id_order=$order_id&idpay-message=$msg");
+            Tools::redirect(
+            sprintf("%sindex.php?controller=$checkout_type&submitReorder=&id_order=$order_id&idpay-message=$msg",__PS_BASE_URI__)
+            );
             exit;
         } else {
             Tools::redirect($result->link);
