@@ -2,7 +2,7 @@
 /**
  * IDPay payment gateway
  *
- * @developer JMDMahdi, meysamrazmi, vispa
+ * @developer JMDMahdi, meysamrazmi, vispa, Mohammad Malek(MimDeveloper.Tv)
  * @publisher IDPay
  * @copyright (C) 2018-2020 IDPay
  * @license http://www.gnu.org/licenses/gpl-2.0.html GPLv2 or later
@@ -21,65 +21,63 @@ if (isset($_GET['do'])) {
         $idpay->do_payment($cart);
     }
 
-    $status    = !empty($_POST['status'])  ? $_POST['status']   : (!empty($_GET['status'])  ? $_GET['status']   : NULL);
-    $track_id  = !empty($_POST['track_id'])? $_POST['track_id'] : (!empty($_GET['track_id'])? $_GET['track_id'] : NULL);
-    $pid       = !empty($_POST['id'])      ? $_POST['id']       : (!empty($_GET['id'])      ? $_GET['id']       : NULL);
-    $orderid   = !empty($_POST['order_id'])? $_POST['order_id'] : (!empty($_GET['order_id'])? $_GET['order_id'] : NULL);
+    $status = !empty($_POST['status']) ? $_POST['status'] : (!empty($_GET['status']) ? $_GET['status'] : NULL);
+    $track_id = !empty($_POST['track_id']) ? $_POST['track_id'] : (!empty($_GET['track_id']) ? $_GET['track_id'] : NULL);
+    $pid = !empty($_POST['id']) ? $_POST['id'] : (!empty($_GET['id']) ? $_GET['id'] : NULL);
+    $orderid = !empty($_POST['order_id']) ? $_POST['order_id'] : (!empty($_GET['order_id']) ? $_GET['order_id'] : NULL);
 
-    if (!empty($pid) && !empty($orderid) && !empty($status) ) {
+    if (!empty($pid) && !empty($orderid) && !empty($status)) {
         $amount = $cart->getOrderTotal();
         if (Configuration::get('idpay_currency') == "toman") {
             $amount *= 10;
         }
-        if ( md5($amount . $orderid . Configuration::get('idpay_HASH_KEY')) == $_GET['hash'] ) {
-            if($status == 10) {
-                $api_key = Configuration::get( 'idpay_api_key' );
-                $sandbox = Configuration::get( 'idpay_sandbox' ) == 'yes' ? 'true' : 'false';
+        if (md5($amount . $orderid . Configuration::get('idpay_HASH_KEY')) == $_GET['hash']) {
+            if ($status == 10) {
+                $api_key = Configuration::get('idpay_api_key');
+                $sandbox = Configuration::get('idpay_sandbox') == 'yes' ? 'true' : 'false';
 
                 $data = array(
-                    'id'       => $pid,
+                    'id' => $pid,
                     'order_id' => $orderid,
                 );
 
                 $ch = curl_init();
-                curl_setopt( $ch, CURLOPT_URL, 'https://api.idpay.ir/v1.1/payment/verify' );
-                curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode( $data ) );
-                curl_setopt( $ch, CURLOPT_RETURNTRANSFER, TRUE );
-                curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
+                curl_setopt($ch, CURLOPT_URL, 'https://api.idpay.ir/v1.1/payment/verify');
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array(
                     'Content-Type: application/json',
                     'X-API-KEY:' . $api_key,
                     'X-SANDBOX:' . $sandbox,
-                ) );
+                ));
 
-                $result      = curl_exec( $ch );
-                $result      = json_decode( $result );
-                $http_status = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
-                curl_close( $ch );
+                $result = curl_exec($ch);
+                $result = json_decode($result);
+                $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
 
-                if ( $http_status != 200 ) {
-                    echo $idpay->error( sprintf( $idpay->l('Error: %s (code: %s)'), $result->error_message, $result->error_code) );
-                }
-                else {
-                    $verify_status   = empty( $result->status ) ? NULL : $result->status;
-                    $verify_track_id = empty( $result->track_id ) ? NULL : $result->track_id;
-                    $verify_order_id = empty( $result->order_id ) ? NULL : $result->order_id;
-                    $verify_amount   = empty( $result->amount ) ? NULL : $result->amount;
+                if ($http_status != 200) {
+                    echo $idpay->error(sprintf($idpay->l('Error: %s (code: %s)'), $result->error_message, $result->error_code));
+                } else {
+                    $verify_status = empty($result->status) ? NULL : $result->status;
+                    $verify_track_id = empty($result->track_id) ? NULL : $result->track_id;
+                    $verify_order_id = empty($result->order_id) ? NULL : $result->order_id;
+                    $verify_amount = empty($result->amount) ? NULL : $result->amount;
 
-                    if ( empty( $verify_status ) || empty( $verify_track_id ) || empty( $verify_amount ) || $verify_status < 100 || $verify_order_id !== $orderid ) {
-                        echo $idpay->error( idpay_get_failed_message( $verify_track_id, $verify_order_id ) );
-                    }
-                    else {
-                        error_reporting( E_ALL );
+                    if (empty($verify_status) || empty($verify_track_id) || empty($verify_amount) || $verify_status < 100 || $verify_order_id !== $orderid) {
+                        echo $idpay->error(idpay_get_failed_message($verify_track_id, $verify_order_id));
+                    } else {
+                        error_reporting(E_ALL);
 
-                        if ( Configuration::get( 'idpay_currency' ) == "toman" ){
+                        if (Configuration::get('idpay_currency') == "toman") {
                             $amount /= 10;
                         }
 
-                        $message = idpay_get_success_massage( $verify_track_id, $verify_order_id );
-                        $idpay->saveOrder( $message, Configuration::get( 'PS_OS_PAYMENT' ), (int)$verify_order_id, $verify_track_id);
+                        $message = idpay_get_success_massage($verify_track_id, $verify_order_id);
+                        $idpay->saveOrder($message, Configuration::get('PS_OS_PAYMENT'), (int)$verify_order_id, $verify_track_id);
 
                         $_SESSION['order' . $verify_order_id] = '';
-                        Tools::redirect( 'index.php?controller=order-confirmation'.
+                        Tools::redirect('index.php?controller=order-confirmation' .
                             '&id_cart=' . $cart->id .
                             '&id_module=' . $idpay->id .
                             '&id_order=' . $verify_order_id .
@@ -89,22 +87,21 @@ if (isset($_GET['do'])) {
                     }
                 }
             } else {
-                $message = sprintf( $idpay->l('Error: %s (code: %s)'), $idpay->get_status($status), $status) .'<br>'. idpay_get_failed_message( $track_id, $orderid );
+                $message = sprintf($idpay->l('Error: %s (code: %s)'), $idpay->get_status($status), $status) . '<br>' . idpay_get_failed_message($track_id, $orderid);
 
-                $idpay->saveOrder($message, Configuration::get( 'PS_OS_ERROR' ), (int)$orderid, $track_id);
+                $idpay->saveOrder($message, Configuration::get('PS_OS_ERROR'), (int)$orderid, $track_id);
 
                 $_SESSION['order' . $orderid] = '';
                 $cookie->idpay_message = $message;
 
                 $checkout_type = Configuration::get('PS_ORDER_PROCESS_TYPE') ? 'order-opc' : 'order';
-                Tools::redirect( "index.php?controller=$checkout_type&submitReorder=&id_order=$orderid");
+                Tools::redirect("index.php?controller=$checkout_type&submitReorder=&id_order=$orderid");
             }
         } else {
-            echo $idpay->error( $idpay->l('Wrong Input Parameters.') );
+            echo $idpay->error($idpay->l('Wrong Input Parameters.'));
         }
-    }
-    else{
-        echo $idpay->error( $idpay->l('No transaction found.') );
+    } else {
+        echo $idpay->error($idpay->l('No transaction found.'));
     }
     include_once(dirname(__FILE__) . '/../../footer.php');
 } else {
