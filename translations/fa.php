@@ -6,7 +6,7 @@ $_MODULE['<{idpay}prestashop>callback_4a32bc015c52e8c6d6f0ad50700d3c22'] = ' خ�
 $_MODULE['<{idpay}prestashop>callback_52b5ecba5aabaeceac321748842f837a'] = 'پارامتر های ورودی اشتباه هستند.';
 $_MODULE['<{idpay}prestashop>callback_c12797be2c50c228071f595f6d5a0340'] = 'تراکنشی یافت نشد.';
 $_MODULE['<{idpay}prestashop>idpay_e7af992a2d86e65bc64d80ab73a73e72'] = 'افزونه پرداخت IDPay';
-$_MODULE['<{idpay}prestashop>idpay_14b0f41ef930fa39948db39bb93c40ac'] = ' پرداخت آنلاین با درگاه IDPay';
+$_MODULE['<{idpay}prestashop>idpay_14b0f41ef930fa39948db39bb93c40ac'] = ' پرداخت امن توسط درگاه IDPay';
 $_MODULE['<{idpay}prestashop>idpay_69a1a3ad8dd5da6db3c4da838a0cf9c7'] = 'آیا برای پاک کردن اطلاعات مطمئن هستید؟';
 $_MODULE['<{idpay}prestashop>idpay_e2d93539acef2afbbadf8542351fb2b4'] = 'استفاده از ارز برای این ماژول غیر فعال هست.';
 $_MODULE['<{idpay}prestashop>idpay_ceabc8f7e0fdd3bdf03be359ff7a5a98'] = 'برای استفاده از این درگاه پرداخت شما باید API TOKEN وب سرویس خود را وارد نمایید.';

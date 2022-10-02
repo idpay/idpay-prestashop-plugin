@@ -2,7 +2,7 @@
 /**
  * IDPay payment gateway
  *
- * @developer JMDMahdi, meysamrazmi, vispa
+ * @developer JMDMahdi, meysamrazmi, vispa, Mohammad Malek(MimDeveloper.Tv)
  * @publisher IDPay
  * @copyright (C) 2018-2020 IDPay
  * @license http://www.gnu.org/licenses/gpl-2.0.html GPLv2 or later
@@ -23,7 +23,7 @@ class idpay extends PaymentModule
 
         $this->name = 'idpay';
         $this->tab = 'payments_gateways';
-        $this->version = '2.0';
+        $this->version = '2.1';
         $this->author = 'Developer: JMDMahdi, meysamrazmi, vispa, Publisher: IDPay';
         $this->currencies = true;
         $this->currencies_mode = 'radio';
@@ -51,7 +51,7 @@ class idpay extends PaymentModule
             || !$this->registerHook('payment')
             || !$this->registerHook('paymentReturn')
             || !$this->registerHook('displayShoppingCartFooter')
-            || !$this->addOrderState($this->l('Awaiting IDPay Payment')) )
+            || !$this->addOrderState($this->l('Awaiting IDPay Payment')))
             return false;
         else
             return true;
@@ -65,7 +65,7 @@ class idpay extends PaymentModule
             || !Configuration::deleteByName('idpay_failed_massage')
             || !Configuration::deleteByName('idpay_sandbox')
             || !Configuration::deleteByName('idpay_currency')
-            || !Configuration::deleteByName('idpay_HASH_KEY') )
+            || !Configuration::deleteByName('idpay_HASH_KEY'))
             return false;
         else
             return true;
@@ -95,7 +95,7 @@ class idpay extends PaymentModule
             $order_state->name = array();
             $languages = Language::getLanguages(false);
             foreach ($languages as $language)
-                $order_state->name[ $language['id_lang'] ] = $name;
+                $order_state->name[$language['id_lang']] = $name;
 
             // Update object
             $order_state->add();
@@ -165,28 +165,27 @@ class idpay extends PaymentModule
         $name = $delivery->firstname . ' ' . $delivery->lastname;
         $phone = $delivery->phone_mobile;
 
-        if (empty($phone_mobile)) {
+        if (empty($phone)) {
             $phone = $delivery->phone;
         }
 
-        if ( empty($amount) || $amount < 1000 || $amount > 500000000 ) {
-            echo $this->error( $this->l('amount should be greater than 1,000 Rials and smaller than 500,000,000 Rials.') );
+        if (empty($amount) || $amount < 1000 || $amount > 500000000) {
+            echo $this->error($this->l('amount should be greater than 1,000 Rials and smaller than 500,000,000 Rials.'));
         }
 
         $states = OrderState::getOrderStates((int)$this->context->language->id);
-        $state_id = 1; //Awaiting check payment
-        // check if order state exist
+        $state_id = 1;
         foreach ($states as $state) {
-            if ( in_array($this->name, $state) ) {
+            if (in_array($this->name, $state)) {
                 $state_id = $state['id_order_state'];
                 break;
             }
         }
 
-        $this->validateOrder( $cart->id, $state_id, $amount, $this->displayName, '', array(), (int)$this->context->currency->id );
+        $this->validateOrder($cart->id, $state_id, $amount, $this->displayName, '', array(), (int)$this->context->currency->id);
         $order_id = Order::getOrderByCartId((int)($cart->id));
 
-        $desc = sprintf( $this->l('Payment for order: %s'), $order_id );
+        $desc = sprintf($this->l('Payment for order: %s'), $order_id);
         $callback = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? "https://" : "http://") . $_SERVER['HTTP_HOST'] . __PS_BASE_URI__ . 'modules/idpay/callback.php?do=callback&hash=' . md5($amount . $order_id . Configuration::get('idpay_HASH_KEY'));
         $mail = Context::getContext()->customer->email;
 
@@ -215,12 +214,15 @@ class idpay extends PaymentModule
         curl_close($ch);
 
         if ($http_status != 201 || empty($result) || empty($result->id) || empty($result->link)) {
-            $msg = sprintf( $this->l('Error: %s (code: %s)'), $result->error_message, $result->error_code);
-            $this->saveOrder($msg, Configuration::get( 'PS_OS_ERROR' ), $order_id);
+            $msg = sprintf($this->l('Error: %s (code: %s)'), $result->error_message, $result->error_code);
+            $this->saveOrder($msg, Configuration::get('PS_OS_ERROR'), $order_id);
             $this->context->cookie->idpay_message = $msg;
 
             $checkout_type = Configuration::get('PS_ORDER_PROCESS_TYPE') ? 'order-opc' : 'order';
-            Tools::redirect( "/index.php?controller=$checkout_type&submitReorder=&id_order=$order_id&idpay-message=$msg");
+            Tools::redirect(
+                sprintf("%sindex.php?controller=%s&submitReorder=&id_order=%s&idpay-message=%s",
+                    __PS_BASE_URI__, $checkout_type, $order_id, $msg)
+            );
             exit;
         } else {
             Tools::redirect($result->link);
@@ -246,7 +248,7 @@ class idpay extends PaymentModule
         $order_message->id_order = (int)$order_id;
         $order_message->add();
 
-        if( !$transaction_id )
+        if (!$transaction_id)
             return;
 
         $sql = 'SELECT reference FROM `' . _DB_PREFIX_ . 'orders` WHERE id_order  = "' . $order_id . '"';
@@ -259,12 +261,12 @@ class idpay extends PaymentModule
 
     public function error($str)
     {
-        return '<div class="alert alert-danger error" dir="rtl" style="text-align: right;padding: 15px;">' . $str . '</div>';
+        return '<div class="alert alert-danger error" dir="rtl" style="text-align: center;padding: 20px;font-size: 20px;">' . $str . '</div>';
     }
 
     public function success($str)
     {
-        return '<div class="conf alert-success confirm" dir="rtl" style="text-align: right;padding: 15px;">' . $str . '</div>';
+        return '<div class="conf alert-success confirm" dir="rtl" style="text-align: center;padding: 20px;font-size: 20px;">' . $str . '</div>';
     }
 
     public function hookPayment($params)
@@ -273,8 +275,8 @@ class idpay extends PaymentModule
         $smarty->assign('name', $this->description);
 
         $output = '';
-        if( !empty($_GET['idpay-message']) )
-            $output .= $this->error( $_GET['idpay-message'] );
+        if (!empty($_GET['idpay-message']))
+            $output .= $this->error($_GET['idpay-message']);
 
         if ($this->active)
             $output .= $this->display(__FILE__, 'idpay.tpl');
@@ -282,18 +284,17 @@ class idpay extends PaymentModule
         return $output;
     }
 
-    public function hookDisplayShoppingCartFooter(){
+    public function hookDisplayShoppingCartFooter()
+    {
         global $cookie;
         $output = '';
-        if( !empty($_GET['idpay-message']) ){
-            $output .= $this->error( $_GET['idpay-message'] );
-        }
-        else if( !empty($cookie->idpay_message) ){
-            $output .= $this->error( $cookie->idpay_message );
+        if (!empty($_GET['idpay-message'])) {
+            $output .= $this->error($_GET['idpay-message']);
+        } else if (!empty($cookie->idpay_message)) {
+            $output .= $this->error($cookie->idpay_message);
             $cookie->idpay_message = '';
-        }
-        else if( !empty($_SESSION['idpay-message']) ){
-            $output .= $this->error( $_SESSION['idpay-message'] );
+        } else if (!empty($_SESSION['idpay-message'])) {
+            $output .= $this->error($_SESSION['idpay-message']);
             $_SESSION['idpay-message'] = '';
         }
 
@@ -305,7 +306,7 @@ class idpay extends PaymentModule
         global $smarty;
         $output = '';
 
-        if( !empty($_GET['idpay-message']) ){
+        if (!empty($_GET['idpay-message'])) {
             $smarty->assign('message', $_GET['idpay-message']);
         }
         if ($this->active)
@@ -314,7 +315,8 @@ class idpay extends PaymentModule
         return $output;
     }
 
-    public function get_status($status_code){
+    public function get_status($status_code)
+    {
         switch ($status_code) {
             case 1:
                 return $this->l('پرداخت انجام نشده است');
