@@ -225,9 +225,17 @@ class idpay extends PaymentModule
             );
             exit;
         } else {
+            $msg = 'Redirected To IPG';
+            $this->saveTransactionID($order_id, $result->id);
             Tools::redirect($result->link);
             exit;
         }
+    }
+
+    public function saveTransactionID($order_id, $transaction_id)
+    {
+        $sql = 'UPDATE `' . _DB_PREFIX_ . 'orders` SET `payment` = "' . $transaction_id . '" WHERE `id_order` = "' . $order_id . '"';
+        return $result = Db::getInstance()->Execute($sql);
     }
 
     /**

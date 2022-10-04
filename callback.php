@@ -32,7 +32,8 @@ if (isset($_GET['do'])) {
             $amount *= 10;
         }
         if (md5($amount . $orderid . Configuration::get('idpay_HASH_KEY')) == $_GET['hash']) {
-            if ($status == 10) {
+            $db = Db::getInstance();
+            if ($status == 10 && isNotDoubleSpending($db, $orderid, $pid)) {
                 $api_key = Configuration::get('idpay_api_key');
                 $sandbox = Configuration::get('idpay_sandbox') == 'yes' ? 'true' : 'false';
 
@@ -108,6 +109,14 @@ if (isset($_GET['do'])) {
     header('Status: 403 Forbidden');
     header('HTTP/1.1 403 Forbidden');
     exit();
+}
+
+function isNotDoubleSpending($reference, $order_id, $transaction_id)
+{
+    $db = $reference;
+    $sqlOrders = 'SELECT reference FROM `' . _DB_PREFIX_ . 'orders` WHERE id_order  = "' . $order_id . '"' . ' AND payment ="' . $transaction_id . '"';
+    $relatedOrder = $db->executes($sqlOrders);
+    return $relatedOrder != false && count($relatedOrder) != 0;
 }
 
 function idpay_get_failed_message($track_id, $order_id)
