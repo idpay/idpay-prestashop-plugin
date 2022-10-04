@@ -142,10 +142,22 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
             Tools::redirect('index.php?controller=order-confirmation');
 
         } else {
+            $this->saveTransactionID($order_id, $result->id);
             Tools::redirect($result->link);
             exit;
         }
 
+    }
+
+    public function saveTransactionID($order_id, $transaction_id)
+    {
+        $sqlcart = 'SELECT checkout_session_data FROM `' . _DB_PREFIX_ . 'cart` WHERE id_cart  = "' . $order_id . '"';
+        $cart = Db::getInstance()->getRow($sqlcart)['checkout_session_data'];
+        $cart = json_decode($cart, true);
+        $cart['idpayTransactionId'] = $transaction_id;
+        $cart = json_encode($cart);
+        $sql = 'UPDATE `' . _DB_PREFIX_ . 'cart` SET `checkout_session_data` = ' . "'" . $cart . "'" . ' WHERE `id_cart` = ' . $order_id;
+        return Db::getInstance()->Execute($sql);
     }
 
     public function callBack($customer)
@@ -196,7 +208,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
                         $msg = sprintf('خطا هنگام ایجاد تراکنش. وضعیت خطا: %s - کد خطا: %s - پیام خطا: %s', $http_status, $result->error_code, $result->error_message);
                         $this->errors[] = $msg;
                         $this->notification();
-                        $this->saveOrderState($cart,$customer,8,$msg);
+                        $this->saveOrderState($cart, $customer, 8, $msg);
                         Tools::redirect('index.php?controller=order-confirmation');
 
                     } else {
@@ -212,7 +224,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
 
                             //generate msg and save to database as order
                             $msgForSaveDataTDataBase = $this->otherStatusMessages(1000) . "کد پیگیری :  $verify_track_id " . "شماره کارت :  $card_no " . "شماره کارت رمزنگاری شده : $hashed_card_no ";
-                            $this->saveOrderState($cart,$customer,8,$msgForSaveDataTDataBase);
+                            $this->saveOrderState($cart, $customer, 8, $msgForSaveDataTDataBase);
                             $msg = $this->idpay_get_failed_message($verify_track_id, $verify_order_id, 1000);
                             $this->errors[] = $msg;
                             $this->notification();
@@ -225,7 +237,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
                             }
 
                             $msgForSaveDataTDataBase = $this->otherStatusMessages($verify_status) . "کد پیگیری :  $verify_track_id " . "شماره کارت :  $card_no " . "شماره کارت رمزنگاری شده : $hashed_card_no ";
-                            $this->saveOrderState($cart,$customer,Configuration::get('PS_OS_PAYMENT'),$msgForSaveDataTDataBase);
+                            $this->saveOrderState($cart, $customer, Configuration::get('PS_OS_PAYMENT'), $msgForSaveDataTDataBase);
                             $this->success[] = $this->idpay_get_success_message($verify_track_id, $verify_order_id, $verify_status);
                             $this->notification();
                             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . (int)$order->id_cart . '&id_module=' . (int)$this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
@@ -234,7 +246,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
                 } else {
 
                     $msgForSaveDataTDataBase = $this->otherStatusMessages($status) . "کد پیگیری :  $track_id " . "شماره سفارش :  $order_id  ";
-                    $this->saveOrderState($cart,$customer,8,$msgForSaveDataTDataBase);
+                    $this->saveOrderState($cart, $customer, 8, $msgForSaveDataTDataBase);
                     $this->errors[] = $this->idpay_get_failed_message($track_id, $order_id, $status);
                     $this->notification();
                     Tools::redirect('index.php?controller=order-confirmation');
@@ -246,7 +258,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
                 $this->errors[] = $this->idpay_get_failed_message($track_id, $order_id, 405);
                 $this->notification();
                 $msgForSaveDataTDataBase = $this->otherStatusMessages(1000) . "کد پیگیری :  $track_id " . "شماره سفارش :  $order_id  ";
-                $this->saveOrderState($cart,$customer,8,$msgForSaveDataTDataBase);
+                $this->saveOrderState($cart, $customer, 8, $msgForSaveDataTDataBase);
                 Tools::redirect('index.php?controller=order-confirmation');
             }
         } else {
@@ -256,39 +268,28 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
         }
     }
 
-    public function saveOrderState($cart,$customer,$state, $message)
+    public function saveOrderState($cart, $customer, $state, $message)
     {
-      return $this->module->validateOrder(
-             (int)$cart->id,
-              $state,
-             (float)$cart->getOrderTotal(true, Cart::BOTH),
-             $message,
+
+        return $this->module->validateOrder(
+            (int)$cart->id,
+            $state,
+            (float)$cart->getOrderTotal(true, Cart::BOTH),
+            $message,
             null,
             null,
-             (int)$this->context->currency->id,
+            (int)$this->context->currency->id,
             false,
-             $customer->secure_key
+            $customer->secure_key
         );
     }
 
-    /**
-     * @param $track_id
-     * @param $order_id
-     * @param null $msgNumber
-     * @return string
-     */
     function idpay_get_success_message($track_id, $order_id, $msgNumber = null)
     {
         $msg = $this->otherStatusMessages($msgNumber);
         return str_replace(["{track_id}", "{order_id}"], [$track_id, $order_id], Configuration::get('idpay_success_massage')) . "<br>" . $msg;
     }
 
-    /**
-     * @param $track_id
-     * @param $order_id
-     * @param null $msgNumber
-     * @return mixed
-     */
     public function idpay_get_failed_message($track_id, $order_id, $msgNumber = null)
     {
         $msg = $this->otherStatusMessages($msgNumber);
@@ -296,10 +297,6 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
 
     }
 
-    /**
-     * @param null $msgNumber
-     * @return string
-     */
     public function otherStatusMessages($msgNumber = null)
     {
 
