@@ -160,14 +160,30 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
         return Db::getInstance()->Execute($sql);
     }
 
+    public static function sanitize($variable)
+    {
+        return trim(strip_tags($variable));
+    }
+
+    public static function isNotDoubleSpending($reference, $order_id, $transaction_id)
+    {
+        if ($reference->id == $order_id) {
+            $sqlcart = 'SELECT checkout_session_data FROM `' . _DB_PREFIX_ . 'cart` WHERE id_cart  = "' . $order_id . '"';
+            $cart = Db::getInstance()->getRow($sqlcart)['checkout_session_data'];
+            $cart = json_decode($cart, true);
+            return $cart['idpayTransactionId'] == $transaction_id;
+        }
+        return false;
+    }
+
     public function callBack($customer)
     {
-        $order_id = $_REQUEST['order_id'];
-        $cart = $this->context->cart;
+        $pid = IDPayValidationModuleFrontController::sanitize($_REQUEST['id']);
+        $status = IDPayValidationModuleFrontController::sanitize($_REQUEST['status']);
+        $track_id = IDPayValidationModuleFrontController::sanitize($_REQUEST['track_id']);
+        $order_id = IDPayValidationModuleFrontController::sanitize($_REQUEST['order_id']);
         $order = new Order((int)$order_id);
-        $pid = $_REQUEST['id'];
-        $status = $_REQUEST['status'];
-        $track_id = $_REQUEST['track_id'];
+        $cart = $this->context->cart;
         $amount = (float)$cart->getOrderTotal(true, Cart::BOTH);
 
         if (!empty($pid) && !empty($order_id) && !empty($status)) {
@@ -178,9 +194,9 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
 
             $md5 = md5($amount . $order_id . Configuration::get('idpay_HASH_KEY'));
 
-            if (!empty($pid) && !empty($order_id) && $md5 == $_GET['hash']) {
+            if ($md5 == IDPayValidationModuleFrontController::sanitize($_GET['hash'])) {
 
-                if ($status == 10) {
+                if ($status == 10 && self::isNotDoubleSpending($cart, $order_id, $pid)) {
 
                     $api_key = Configuration::get('idpay_api_key');
                     $sandbox = Configuration::get('idpay_sandbox') == 'yes' ? 'true' : 'false';

@@ -75,11 +75,11 @@ class IDPay extends PaymentModule
     {
 
         if (Tools::isSubmit('idpay_submit')) {
-            Configuration::updateValue('idpay_api_key', $_POST['idpay_api_key']);
-            Configuration::updateValue('idpay_sandbox', $_POST['idpay_sandbox']);
-            Configuration::updateValue('idpay_currency', $_POST['idpay_currency']);
-            Configuration::updateValue('idpay_success_massage', $_POST['idpay_success_massage']);
-            Configuration::updateValue('idpay_failed_massage', $_POST['idpay_failed_massage']);
+            Configuration::updateValue('idpay_api_key', idpay::sanitize($_POST['idpay_api_key']));
+            Configuration::updateValue('idpay_sandbox', idpay::sanitize($_POST['idpay_sandbox']));
+            Configuration::updateValue('idpay_currency', idpay::sanitize($_POST['idpay_currency']));
+            Configuration::updateValue('idpay_success_massage', idpay::sanitize($_POST['idpay_success_massage']));
+            Configuration::updateValue('idpay_failed_massage', idpay::sanitize($_POST['idpay_failed_massage']));
             $this->_html .= '<div class="conf confirm">' . $this->l('Settings updated') . '</div>';
         }
 
@@ -88,6 +88,10 @@ class IDPay extends PaymentModule
 
     }
 
+    public static function sanitize($variable)
+    {
+        return trim(strip_tags($variable));
+    }
 
     /**
      * generate setting form for admin
