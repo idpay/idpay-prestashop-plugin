@@ -26,6 +26,11 @@ if (isset($_GET['do'])) {
     $pid = !empty($_POST['id']) ? $_POST['id'] : (!empty($_GET['id']) ? $_GET['id'] : NULL);
     $orderid = !empty($_POST['order_id']) ? $_POST['order_id'] : (!empty($_GET['order_id']) ? $_GET['order_id'] : NULL);
 
+    $status = !empty($status) ? idpay::sanitize($status) : NULL;
+    $track_id = !empty($track_id) ? idpay::sanitize($track_id) : NULL;
+    $pid = !empty($pid) ? idpay::sanitize($pid) : NULL;
+    $orderid = !empty($orderid) ? idpay::sanitize($orderid) : NULL;
+
     if (!empty($pid) && !empty($orderid) && !empty($status)) {
         $amount = $cart->getOrderTotal();
         if (Configuration::get('idpay_currency') == "toman") {
