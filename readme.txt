@@ -4,7 +4,7 @@ Tags: payment, idpay, gateway, آیدی پی
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Stable tag: 1.0.0
-Tested up to: 1.6.x
+Tested up to: 1.6.1.24
 
 == Description ==
 
@@ -30,6 +30,6 @@ Thank you so much for using IDPay Payment Gateway.
 
 = 1.0.0, June 18, 2022 =
 * First official release
-* Tested Up With Prestashop 1.6.x
+* Tested Up With Prestashop 1.6.1.24
 * Check Double Spending Correct
 * Check Does Not Xss Attack Correct
