@@ -103,7 +103,7 @@ class IDPayValidationModuleFrontController extends ModuleFrontController
         // $callback = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? "https://" : "http://") . $_SERVER['SERVER_NAME'] . '/index.php?fc=module&module=idpay&controller=validation&id_lang=2&do=callback&hash=' . md5($amount . $order_id . Configuration::get('idpay_HASH_KEY'));
         $callback = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? "https://" : "http://")
             . $_SERVER['SERVER_NAME']
-            . 'index.php?fc=module&module=idpay&controller=validation&id_lang=2&do=callback&hash='
+            . '/index.php?fc=module&module=idpay&controller=validation&id_lang=2&do=callback&hash='
             . $md5;
 
         if (empty($amount)) {
